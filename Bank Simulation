@@ -1,0 +1,76 @@
+#include <iostream>
+#include <fstream>
+#include <queue>
+#include "PriorityQueue.h"
+
+using namespace std;
+
+int main() {
+    PriorityQueue eventList;
+    queue<Event> bankQueue;
+
+    ifstream input("input.txt");
+
+    int arrivalTime, transactionTime;
+
+    // Load arrival events
+    while (input >> arrivalTime >> transactionTime) {
+        Event newEvent('A', arrivalTime, transactionTime);
+        eventList.enqueue(newEvent);
+    }
+
+    bool tellerAvailable = true;
+    int currentTime = 0;
+
+    int totalWait = 0;
+    int customerCount = 0;
+
+    while (!eventList.isEmpty()) {
+        Event currentEvent = eventList.peek();
+        eventList.dequeue();
+
+        currentTime = currentEvent.getTime();
+
+        if (currentEvent.getType() == 'A') {
+            cout << "Processing an arrival event at time: " << currentTime << endl;
+
+            customerCount++;
+
+            if (bankQueue.empty() && tellerAvailable) {
+                // serve immediately
+                int departTime = currentTime + currentEvent.getLength();
+                Event departEvent('D', departTime, 0);
+                eventList.enqueue(departEvent);
+                tellerAvailable = false;
+            } else {
+                bankQueue.push(currentEvent);
+            }
+        }
+
+        else {
+            cout << "Processing a departure event at time: " << currentTime << endl;
+
+            if (!bankQueue.empty()) {
+                Event nextCustomer = bankQueue.front();
+                bankQueue.pop();
+
+                int wait = currentTime - nextCustomer.getTime();
+                totalWait += wait;
+
+                int departTime = currentTime + nextCustomer.getLength();
+                Event departEvent('D', departTime, 0);
+                eventList.enqueue(departEvent);
+            } else {
+                tellerAvailable = true;
+            }
+        }
+    }
+
+    cout << "Simulation ends.\n\n";
+    cout << "Final Statistics:\n";
+    cout << "Total number of customers processed: " << customerCount << endl;
+    cout << "Average amount of time spent waiting: "
+         << (double)totalWait / customerCount << endl;
+
+    return 0;
+}
