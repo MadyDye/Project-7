@@ -1,0 +1,40 @@
+#ifndef EVENT_H
+#define EVENT_H
+
+class Event {
+private:
+    char type;     // 'A' = arrival, 'D' = departure
+    int time;      // event time
+    int length;    // transaction time
+
+public:
+    Event() : type('A'), time(0), length(0) {}
+    Event(char t, int tm, int len) : type(t), time(tm), length(len) {}
+
+    char getType() const { return type; }
+    int getTime() const { return time; }
+    int getLength() const { return length; }
+
+    void setType(char t) { type = t; }
+    void setTime(int t) { time = t; }
+    void setLength(int l) { length = l; }
+
+    // Reverse logic for priority queue (smaller time = higher priority)
+    bool operator>(const Event& right) const {
+        return this->time < right.time;
+    }
+
+    bool operator<(const Event& right) const {
+        return this->time > right.time;
+    }
+
+    bool operator==(const Event& right) const {
+        return this->time == right.time;
+    }
+
+    bool operator!=(const Event& right) const {
+        return !(*this == right);
+    }
+};
+
+#endif
